@@ -30,6 +30,7 @@ metadata <-  read.csv("airway_metadata.csv")
 head(metadata)
 dim(metadata)
 dim(counts)
+View(metadata)
 ```
 ##Q1. How many genes are in this dataset? 
 
@@ -38,7 +39,7 @@ There are 38,694 genes in this dataset.
 ##Q2. How many ‘control’ cell lines do we have? 
 
 
-There are 
+There are 4 'control' cell lines in the dataset. 
 
 
 
