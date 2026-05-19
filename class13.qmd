@@ -1,0 +1,75 @@
+---
+title: "class13"
+author: "Siddharth Ranade (PID: A18594442)"
+format: pdf
+---
+
+#Bioconductor setup
+```{r}
+#install.packages("BiocManager")
+#BiocManager::install()
+```
+
+```{r}
+# For this class we will need DESeq2:
+#BiocManager::install("DESeq2")
+```
+```{r}
+library(BiocManager)
+library(DESeq2)
+```
+
+
+
+#Import countData and colData
+
+```{r}
+# Complete the missing code
+counts <- read.csv("airway_scaledcounts.csv", row.names=1)
+metadata <-  read.csv("airway_metadata.csv")
+head(metadata)
+dim(metadata)
+dim(counts)
+```
+##Q1. How many genes are in this dataset? 
+
+There are 38,694 genes in this dataset. 
+
+##Q2. How many ‘control’ cell lines do we have? 
+
+
+There are 
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

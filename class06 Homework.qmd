@@ -1,0 +1,69 @@
+---
+title: "Homework 6"
+author: "Siddharth Ranade"
+format: pdf
+---
+##Q6. How would you generalize the original code above to work with any set of input protein structures?
+
+Write your own function starting from the code above that analyzes protein drug
+interactions by reading in any protein PDB data and outputs a plot for the specified
+protein.
+Create a new RMarkdown document with your function code AND example output. We
+also suggest you include narrative text that address the rubric items below. Generate a
+PDF report and submit this PDF to our GradeScope site.
+scoring rubric:
+Total 10 points assigned as follows:
+Documentation:
+1 pt - comments on what are the inputs to the function.
+1 pt - what the function does and how to use it.
+1 pt - what is the output of the function.
+Code:
+2 pt - function behaves as desired, producing the correct output and follows assignment
+specifications.
+2 pt - the code is efficient meaning it uses best practices such as limiting calculation
+duplication.
+2 pt - code is readable, meaning best practices are used including proper indentation
+and whitespace used, relevant variable names, and organized in a logical manner.
+1 pt - function code and call executes and is working properly.
+
+```{r}
+library(bio3d)
+
+# The inputs of the function are: 
+#   pdb_ids :  vector of the protein database ids 
+#   chain  : the chain that is going to be analyzed "A" can be changed to what 
+#the person using the code wants so long as it makes sense for the protien.  
+# How to use the function and what it does:
+#   First we use a for loop so that you caninput a vector of pbd ids. We then
+#download the PDB structures and read it, then we trim it and then get the 
+#b value. 
+#Once we have the b value the function prints a plot of B value against the 
+#amino acid chain.
+# Output:
+# plot of B-factor vs residue position
+
+analyze_protein_bfactors <- function(pdb_ids, chain = "A") {
+#make a list called results
+  results <- list()
+
+  for (id in pdb_ids) {
+# a for loop that runs through each pbd id provided
+    pdb <- read.pdb(id)
+  # downloads the pbd protein and reads it
+    pdb_chain <- trim.pdb(pdb, chain = chain, elety = "CA")
+    bvals <- pdb_chain$atom$b
+# chain= the chain from the functions argument, elety is given by the 
+#example funtion,
+#i looked it up and its telling the function to trim at the  alpha carbon 
+# we then plot 
+    plotb3(bvals, sse = pdb_chain)
+  }
+
+  return(results)
+}
+analyze_protein_bfactors(c("4AKE", "1AKE", "1E4Y"))
+
+
+```
+
+

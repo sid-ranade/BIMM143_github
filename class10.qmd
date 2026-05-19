@@ -1,0 +1,238 @@
+---
+title: "class10"
+author: "Siddharth (A18594442)"
+format: pdf
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+###1 read.pdb() ###2 NMA() ###3 view.nma() ; mktrj() ; plot()
+
+#Q1: What percentage of structures in the PDB are solved by X-Ray and
+Electron Microscopy.
+
+XRay- 80.95% EM- 12.84%
+
+```{r}
+pdb <- read.csv("pdb_stats.csv")
+head(pdb)
+```
+
+```{r}
+# total number of structures
+total_structures <- sum(pdb$Total)
+
+# totals by method
+xray_total <- sum(pdb$X.ray)
+em_total <- sum(pdb$EM)
+
+# percentages
+xray_percent <- (xray_total / total_structures) * 100
+em_percent <- (em_total / total_structures) * 100
+
+xray_percent
+em_percent
+```
+
+#Q2: What proportion of structures in the PDB are protein?
+
+97.92 percent of structures in the PDB are protein
+
+```{r}
+# grab the total num of protein like structures
+protein_total <- sum(
+  pdb$Total[pdb$Molecular.Type %in% c(
+    "Protein (only)",
+    "Protein/Oligosaccharide",
+    "Protein/NA"
+  )]
+)
+# calculate protien percentage 
+protein_percent <- (protein_total / total_structures) * 100
+
+protein_percent
+```
+
+#Q3: Type HIV in the PDB website search box on the home page and
+determine how many HIV-1 protease structures are in the current PDB?
+
+There are 1,227 HIV-1 protease structures in the current PDB
+
+#Q4: Water molecules normally have 3 atoms. Why do we see just one atom
+per water molecule in this structure?
+
+PDB structures can only resolve the oxygen atom in H2O and so therefore
+only see one atom in the molecule. Hydrogen atoms scatter Xrays weakly
+for Xray crystalography techniques.
+
+# Q5: There is a critical “conserved” water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have
+
+The water molecule in the binding site is HOH 332, it looks like it
+participates in hydrogen bonding with the active site.
+
+#Q6: Generate and save a figure clearly showing the two distinct chains
+of HIV-protease along with the ligand. You might also consider showing
+the catalytic residues ASP 25 in each chain and the critical water (we
+recommend “Ball & Stick” for these side-chains). Add this figure to your
+Quarto document.
+
+1\.
+
+![Critical water molecule HOH 332 in the active site of HIV-1
+protease](images/1HSG.png)
+
+2\.
+
+![Highlighted in orange, ASP 25 (D25) aspartic acid residue of the HIV-1
+protease B chain](images/1HSG%20(1).png)
+
+3.![Highlighted in green, ASP25 (D25) aspartic acid residue of the HIV-1
+protease A chain](images/1HSG%20(2).png)
+
+Highlighted in green, ASP25 (D25) aspartic acid residue of the HIV-1
+protease A chain
+
+Steps for 4. 1 read.pdb() 2 NMA() 3 view.nma() ; mktrj() ; plot()
+
+```{r}
+library(bio3d)
+library(NGLVieweR)
+library(msa)
+```
+
+```{r}
+pdb <- read.pdb("1hsg")
+```
+
+#Q7: How many amino acid residues are there in this pdb object?
+
+There are 198 amino acid residues in the pdb object.
+
+```{r}
+pdb
+
+```
+
+#Q8: Name one of the two non-protein residues?
+
+MK1 is one of the two non protien residues.
+
+#Q9: How many protein chains are in this structure?
+
+There are 2 protien chains in this structure with "values" A and B.
+
+## skipped the in between parts due to incompatibility with rendering to PDF.
+
+#5. Comparitive structural analysis of ADK family 
+
+1. get.seq() - input :database identifier, output: protien sequence 
+2. blast.pdb()-\>get.pdb() input: fasta output: finds and downloads all related structure FASTAs 
+3. pbd.align()
+
+```{r}
+# this is just to give context to the pakages Q10  is talking about:
+
+#install.packages("bio3d")
+#install.packages("NGLVieweR")
+
+#install.packages("remotes")
+#remotes::install_github("bioboot/bio3dview")
+
+#install.packages("BiocManager")
+#BiocManager::install("msa")
+
+```
+
+#Q10. Which of the packages above is found only on BioConductor and not CRAN?
+
+the msa pakage is only found in BioConductor and not CRAN.
+
+#Q11. Which of the above packages is not found on BioConductor or CRAN?:
+
+bio3dview is the pakage that is not found on BioConductor or CRAN.
+
+#Q12. True or False? Functions from the pak package can be used to install packages from GitHub and BitBucket?
+
+TRUE, functions from the pak pakage can be used to install pakages from GitHub and BitBucket. 
+
+##Search and retrieve ADK structures
+
+```{r}
+aa <- get.seq("1ake_A")
+```
+
+```{r}
+aa
+```
+
+##Q13. How many amino acids are in this sequence, i.e. how long is this
+sequence?
+
+There are 214 amino acids in this sequence.
+
+```{r}
+# blast the aa sequence to the ncbi database 
+b <- blast.pdb(aa)
+```
+
+```{r}
+hits <- plot(b)
+```
+
+```{r}
+head(hits$pdb.id)
+```
+
+```{r}
+# Download releated PDB files
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+```
+
+```{r}
+# Align releated PDBs
+pdbs <- pdbaln(files, fit = TRUE, exefile="msa")
+
+```
+
+Quick interactive structural view
+
+```{r}
+
+#library(bio3dview)
+
+#view.pdbs(pdbs)
+```
+
+PCA of all this structural data (x, y, and z atom coordinates)
+
+```{r}
+# pass this to pca 
+
+pc.xray <- pca(pdbs)
+plot(pc.xray)
+
+```
+
+```{r}
+#conformer plot of the conformational variability within all the related PDB structures. 
+plot(pc.xray, 1:2)
+```
+
+```{r}
+#view.pca(pc.xray)
+# gives a superimposed image of all BLAST hit structures
+```
+
+Interactive view of the pc1 captured structural differences
+
+```{r}
+# Visualize first principal component
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+
+```
+
+```{r}
+# gives the x y and z coordinates for wach atom in the structure
+pdbs$xyz
+```

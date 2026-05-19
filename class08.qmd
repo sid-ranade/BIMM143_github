@@ -1,0 +1,246 @@
+---
+title: "class08"
+author: "Siddharth Ranade (PID: A18594442)"
+format: pdf
+---
+
+#Data import
+
+```{r}
+# From lab gide: Save your input data file into your Project directory
+fna.data <- "WisconsinCancer.csv"
+
+# using read.csv to read in data
+wisc.df <- read.csv(fna.data, row.names=1) 
+#rownames =1 is important to make sure patient ID isn't read as data 
+head(wisc.df,n=3)
+```
+
+We need to make sure to remove the "diagnosis" column for our data analysis.
+
+```{r}
+# We can use -1 here to remove the first column
+wisc.data <- wisc.df[,-1]
+# Create diagnosis vector for later 
+diagnosis <- as.factor(wisc.df$diagnosis)
+```
+
+##Q1. How many observations are in this dataset?
+
+```{r}
+nrow(wisc.data)
+```
+
+There are 569 patients/ observations in this dataset ##Q2. How many of the observations have a malignant diagnosis?
+
+```{r}
+table(wisc.df$diagnosis)
+```
+
+There are 212 Malignant cancer diagnoses in the dataset ##Q3. How many variables/features in the data are suffixed with \_mean?
+
+```{r}
+length(grep("_mean",colnames(wisc.data)))
+```
+
+There are 10 columns in the data that are suffixed with \_mean
+
+#Principal Component Analysis (PCA)
+
+```{r}
+wisc.pr <- prcomp(wisc.data,scale=TRUE)
+summary(wisc.pr)
+```
+
+##Q4. From your results, what proportion of the original variance is captured by the first principal component (PC1)?
+
+Principal component 1 captures 44.27% of the original variance in the dataset.
+
+##Q5. How many principal components (PCs) are required to describe at least 70% of the original variance in the data?
+
+The first 3 principal components are required to describe at least 70% of the original variance: PC1:0.4427 + PC2:0.1897= 0.6324+ PC3: 0.09393= 0.72633.
+
+##Q6. How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
+
+We need 7 Principal components to describe at least 90% of the original variance:PC1:0.4427 + PC2:0.1897+ PC3: 0.09393 PC4: 0.06602 + PC5: 0.05496 + PC6: 0.04025 + PC7: 0.02251= 0.91007
+
+#Interpreting PCA results
+
+```{r}
+biplot(wisc.pr)
+```
+
+##Q7. What stands out to you about this plot? Is it easy or difficult to understand? Why?
+
+This plot is hard to understand, what stands out is that it is very crowded.
+
+```{r}
+library(ggplot2)
+ggplot(wisc.pr$x)+ aes(PC1, PC2, col=diagnosis)+geom_point()
+```
+
+##Q8. Generate a similar plot for principal components 1 and 3. What do you notice about these plots?
+
+It seems that a comparison between PC1 and 2 is less able to capture the separation in data as comparing PC1 and PC2, the graph shows the points more overlapped with one another with less separation between diagnosis.
+
+```{r}
+ggplot(wisc.pr$x)+ aes(PC1, PC3, col=diagnosis)+geom_point()
+```
+
+#Variance explained
+
+```{r}
+# Calculate variance of each component
+pr.var <- wisc.pr$sdev^2
+head(pr.var)
+```
+
+```{r}
+# pve is the variance of PC1 over the variance of the rest to make "proportion of variance explained" by pc1 
+pve <- wisc.pr$sdev^2/sum(wisc.pr$sdev^2)
+# Plot variance explained for each principal component
+plot(c(1,pve), xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "o")
+```
+
+```{r}
+# Alternative scree plot of the same data, note data driven y-axis
+barplot(pve, ylab = "Percent of Variance Explained",
+     names.arg=paste0("PC",1:length(pve)), las=2, axes = FALSE)
+axis(2, at=pve, labels=round(pve,2)*100 )
+```
+
+#Hierarchical clustering
+
+we want to use hierarchical clustering to see if there is an obvious split in the dataset between malignant and benign cancer cells
+
+```{r}
+# Scale the wisc.data data using the "scale()" function
+data.scaled <- scale(wisc.data)
+#take the euclidean distance between pairs of observations
+data.dist <- dist(data.scaled)
+wisc.hclust <- hclust(data.dist, method="complete")
+wisc.hclust
+```
+##Results of Hierarchical clustering 
+```{r}
+plot(wisc.hclust)
+abline(h=22, col="red", lty=2)
+```
+## Q10. Using the plot() and abline() functions, what is the height at which the clustering model has 4 clusters?
+
+At height ~22 the clustering model has about 4 clusters above it. 
+
+```{r}
+#grabbing 4 clusters from the hierarchical clustering model
+wisc.hclust.clusters <- cutree(wisc.hclust,k=4)
+#compare to actual diagnosis
+table(wisc.hclust.clusters, diagnosis)
+```
+## Q11. OPTIONAL: Can you find a better cluster vs diagnoses match by cutting into a different number of clusters between 2 and 6? How do you judge the quality of your result in each case?
+
+
+```{r}
+for(k in 2:6){
+
+  clusters <- cutree(wisc.hclust, k = k)
+
+  cat("\nk =", k, "\n")
+  print(table(clusters, diagnosis))
+}
+```
+
+It seems like past 4 clusters there isnt much use trying to group more cells. Past 4 clusters we get clusuters that split along the diagnosis of malignant and benign but start making very small clusters. 
+
+## Q12. Which method gives your favorite results for the same data.dist dataset? Explain your reasoning.
+
+```{r}
+# asked chat GPT to make me a for loop with each method used to custer 
+methods <- c("single", "complete", "average", "ward.D2")
+
+
+# asked chat GPT to make me a for loop 
+for(m in methods){
+
+  # hierarchical clustering with different method
+  hc <- hclust(data.dist, method = m)
+
+  # cut into 4 clusters (same k)
+  clusters <- cutree(hc, k = 4)
+
+  # table
+  tab <- table(clusters, diagnosis)
+
+  cat("\n--- Method:", m, "---\n")
+  print(tab)
+}
+
+
+```
+
+The complete method and the ward.D2 method do the best at making clusters. 
+
+```{r}
+wisc.pr.hclust <- hclust(data.dist, method="ward.D2")
+plot(wisc.pr.hclust)
+```
+```{r}
+grps <- cutree(wisc.pr.hclust, k=2)
+table(grps)
+table(grps, diagnosis)
+```
+```{r}
+ggplot(wisc.pr$x) +
+  aes(PC1, PC2) +
+  geom_point(col=grps)
+```
+##Q13. How well does the newly created hclust model with two clusters separate out the two “M” and “B” diagnoses?
+
+The newly created hclust model with two clusters seperates out the M and B diagnoses better than the original method with 4 clusters.
+
+
+```{r}
+# Use first 7 PCs and compute distance
+wisc.pr.hclust <- hclust(
+  dist(wisc.pr$x[, 1:7]),
+  method = "ward.D2"
+)
+
+# Cut into 2 clusters
+wisc.pr.hclust.clusters <- cutree(wisc.pr.hclust, k = 2)
+
+# Compare to diagnosis
+table(wisc.pr.hclust.clusters, diagnosis)
+table(wisc.hclust.clusters, diagnosis)
+table(diagnosis)
+```
+## Q14. How well do the hierarchical clustering models you created in the previous sections (i.e. without first doing PCA) do in terms of separating the diagnoses? Again, use the table() function to compare the output of each model (wisc.hclust.clusters and wisc.pr.hclust.clusters) with the vector containing the actual diagnoses.
+
+Compared to the pathologist report which we take as having no errors there is a bit of a higher rate of false positive and false negative associated with the model. In general the "ward.D2" model does better than the "complete" method in terms of generating clusters that are clean and contain mainly a certain population of benign vs malignant cell types. 
+
+```{r}
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+
+
+
+```
+```{r}
+plot(wisc.pr$x[,1:2], col=grps)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+```
+##Q16. Which of these new patients should we prioritize for follow up based on your results?
+
+According to our past model we need to prioritize patient 2 for follow up based on these results as they have cells clustered on the PCA plot that are most similar to the malignant cancer cells from the previous data set. 
+#About this document 
+```{r}
+sessionInfo()
+
+```
+
+
+
