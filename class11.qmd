@@ -13,7 +13,7 @@ pdb
 #Make a vector of input PDB file names that we can read into R 
 ```{r}
 # Change this for YOUR results dir name
-results_dir <- "hivprdimer_23119/" 
+results_dir <- "FindageneprojectCMSS1homolog_23c00/"
 pdb_files <- list.files("FindageneprojectCMSS1homolog_23c00/", pattern= ".pdb", full.names = TRUE)
 pdb_files
 ```
@@ -102,16 +102,35 @@ pae5 <- read_json(pae_files[5],simplifyVector = TRUE)
 attributes(pae1)
 ```
 
+```{r}
+library(bio3d)
+
+# Read all data from Models 
+#  and superpose/fit coords
+pdbs <- pdbaln(pdb_files, fit=TRUE, exefile="msa")
+```
+
+```{r}
+pdbs
+```
+```{r}
+rd <- rmsd(pdbs, fit=T)
+range(rd)
+```
 
 
+```{r}
+library(pheatmap)
 
+colnames(rd) <- paste0("m",1:5)
+rownames(rd) <- paste0("m",1:5)
+pheatmap(rd)
+```
 
-
-
-
-
-
-
+```{r}
+# Read a reference PDB structure
+pdb <- read.pdb("1hsg")
+```
 
 
 

@@ -11,7 +11,9 @@ format: pdf
 ```{r}
 # had trouble with the datapasta package so went without it. 
 cdc <- read.csv("U.S. Reported Pertussis Cases_ 1922 - 2025.csv")
-#issue with (,) commasin data.  made collumn a character instead of an int causing it to not be recognized and breaking the graph. deleted commas in that collumn with gsub.
+#issue with (,) commasin data.  made collumn a character instead of an int
+#causing it to not be recognized and breaking the graph. deleted commas in that 
+#collumn with gsub.
 
 cdc$Number.of.Reported.Pertussis.Cases <- as.numeric(
   gsub(",", "", cdc$Number.of.Reported.Pertussis.Cases)
@@ -152,7 +154,8 @@ specimen <- read_json(
   simplifyVector = TRUE
 )
 
-# the only availible api from cmi-pb was plasma_ab_titer. the ab_titer api threw a 404 not found error.
+# the only availible api from cmi-pb was plasma_ab_titer. the ab_titer 
+#api threw a 404 not found error.
 titer <- read_json(
   "https://www.cmi-pb.org/api/plasma_ab_titer",
   simplifyVector = TRUE
