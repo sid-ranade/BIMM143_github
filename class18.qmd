@@ -323,18 +323,43 @@ ssrna <- inner_join(rna, meta)
 ##Q19. Make a plot of the time course of gene expression for IGHG1 gene (i.e. a plot of visit vs. tpm).
 
 ```{r}
+ggplot(ssrna) +
+  aes(visit, tpm, group=subject_id) +
+  geom_point() +
+  geom_line(alpha=0.2)
+```
 
+##Q20.: What do you notice about the expression of this gene (i.e. when is it at it’s maximum level)?
+
+The genes maximum level is during visit 4. 
+
+##Q21. Does this pattern in time match the trend of antibody titer data? If not, why not?
+
+Yes, the antibody titer generally tends to be greatly increased starting at visit 4. 
+
+
+```{r}
+# this is for infancy vac status looking at tpm 
+ggplot(ssrna) +
+  aes(tpm, col=infancy_vac) +
+  geom_boxplot() +
+  facet_wrap(vars(visit))
+```
+
+```{r}
+# aP vs wP during visit 4 
+ssrna %>%  
+  filter(visit==4) %>% 
+  ggplot() +
+    aes(tpm, col=infancy_vac) + geom_density() + 
+    geom_rug() 
 ```
 
 
 
+#6. Working with larger datasets [OPTIONAL]
 
-
-
-
-
-
-
+## data not availible when accessed. 
 
 
 
