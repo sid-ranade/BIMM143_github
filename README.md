@@ -17,6 +17,6 @@ Siddharth Ranade (PID: A18594442)
 11. Lab #13
 12. Lab #14
 13. Lab #15
-14. Lab #18
+14. Lab #18 [Investigating pertussis resurgence mini-project ](https://github.com/sid-ranade/BIMM143_github/blob/main/class18.html)
 15. Lab #19
 16. Lab #20
