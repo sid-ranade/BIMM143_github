@@ -2,11 +2,11 @@
 Siddharth Ranade (PID: A18594442)
 
 1. Lab #5:
-[Data exploration and visualization in R](https://github.com/sid-ranade/BIMM143_github/blob/main/class05.qmd)
+[Data exploration and visualization in R](https://github.com/sid-ranade/BIMM143_github/blob/main/class05.html)
 
 3. Lab #6
 
-[Data exploration and visualization in R](https://github.com/sid-ranade/BIMM143_github/blob/main/class05.qmd)
+[Data exploration and visualization in R](https://htmlpreview.github.io/https://github.com/sid-ranade/BIMM143_github/blob/main/class05.html)
 
 5. Lab #7
 6. Lab #8
@@ -17,6 +17,9 @@ Siddharth Ranade (PID: A18594442)
 11. Lab #13
 12. Lab #14
 13. Lab #15
-14. Lab #18 [Investigating pertussis resurgence mini-project ](https://github.com/sid-ranade/BIMM143_github/blob/main/class18.html)
+14. Lab #18
+
+[Investigating pertussis resurgence mini-project ]( https://tmlpreview.github.io/?:https://github.com/sid-ranade/BIMM143_github/blob/main/class18.html)
+
 15. Lab #19
 16. Lab #20
