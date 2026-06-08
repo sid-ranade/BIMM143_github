@@ -3,14 +3,20 @@ title: "class11"
 author: "Siddharth (A18594442)"
 format: pdf
 ---
+
+# Custom analysis of resulting models
+
 #set pathing and read in a pdb file
+
 ```{r}
+#reading in my protien structure from Alpha fold.  
 library(bio3d)
 pdb <- read.pdb("FindageneprojectCMSS1homolog_23c00/FindageneprojectCMSS1homolog_23c00_unrelaxed_rank_001_alphafold2_ptm_model_1_seed_000.pdb")
 pdb
 ```
 
-#Make a vector of input PDB file names that we can read into R 
+#Make a vector of input PDB file names that we can read into R
+
 ```{r}
 # Change this for YOUR results dir name
 results_dir <- "FindageneprojectCMSS1homolog_23c00/"
@@ -47,6 +53,7 @@ colnames(rd) <- paste0("m",1:5)
 rownames(rd) <- paste0("m",1:5)
 pheatmap(rd)
 ```
+
 ```{r}
 # Read a reference PDB structure
 pdb <- read.pdb("1hsg")
@@ -61,6 +68,7 @@ points(pdbs$b[4,], typ="l", col="darkgreen")
 points(pdbs$b[5,], typ="l", col="orange")
 abline(v=100, col="gray")
 ```
+
 ```{r}
 core <- core.find(pdbs)
 ```
@@ -71,12 +79,10 @@ core.inds <- print(core, vol=0.5)
 
 ```
 
-
 ```{r}
 xyz <- pdbfit(pdbs, core.inds, outpath="corefit_structures")
 
 ```
-
 
 ```{r}
 rf <- rmsf(xyz)
@@ -84,6 +90,7 @@ rf <- rmsf(xyz)
 plotb3(rf, sse=pdb)
 abline(v=100, col="gray", ylab="RMSF")
 ```
+
 ```{r}
 # File names for all PDB models
 pdb_files <- list.files(path=results_dir,
@@ -93,7 +100,6 @@ pdb_files <- list.files(path=results_dir,
 # Print our PDB file names
 basename(pdb_files)
 ```
-
 
 ```{r}
 pae1 <- read_json(pae_files[1],simplifyVector = TRUE)
@@ -113,11 +119,11 @@ pdbs <- pdbaln(pdb_files, fit=TRUE, exefile="msa")
 ```{r}
 pdbs
 ```
+
 ```{r}
 rd <- rmsd(pdbs, fit=T)
 range(rd)
 ```
-
 
 ```{r}
 library(pheatmap)
@@ -129,16 +135,38 @@ pheatmap(rd)
 
 ```{r}
 # Read a reference PDB structure
-pdb <- read.pdb("1hsg")
+pdb <- read.pdb(pdb_files[1])
+plotb3(pdbs$b[1,], typ="l", lwd=2)
+points(pdbs$b[2,], typ="l", col="red")
+points(pdbs$b[3,], typ="l", col="blue")
+points(pdbs$b[4,], typ="l", col="darkgreen")
+points(pdbs$b[5,], typ="l", col="orange")
+
+
+```
+
+```{r}
+# finding the most consistent rigid core: 
+core <- core.find(pdbs)
+```
+
+```{r}
+# using the core atom positions to make a superposition and write it to a new directory. 
+core.inds <- print(core, vol=0.5)
+xyz <- pdbfit(pdbs, core.inds, outpath="corefit_structures")
+```
+
+![](images/clipboard-1513278390.png)
+
+Figure 1. Core superposed 5 structures colored by B-factor.
+
+```{r}
+
 ```
 
 
-
-
-#Citations
-Baek, Minkyung, Frank DiMaio, Ivan Anishchenko, Justas Dauparas, Sergey Ovchinnikov, Gyu Rie Lee, Jue Wang, et al. 2021. “Accurate Prediction of Protein Structures and Interactions Using a Three-Track Neural Network.” Science 373 (6557): 871–76. https://doi.org/10.1126/science.abj8754.
+#Citations Baek, Minkyung, Frank DiMaio, Ivan Anishchenko, Justas Dauparas, Sergey Ovchinnikov, Gyu Rie Lee, Jue Wang, et al. 2021. “Accurate Prediction of Protein Structures and Interactions Using a Three-Track Neural Network.” Science 373 (6557): 871–76. https://doi.org/10.1126/science.abj8754.
 
 Jumper, John, Richard Evans, Alexander Pritzel, Tim Green, Michael Figurnov, Olaf Ronneberger, Kathryn Tunyasuvunakool, et al. 2021. “Highly Accurate Protein Structure Prediction with AlphaFold.” Nature 596 (7873): 583–89. https://doi.org/10.1038/s41586-021-03819-2.
 
 Mirdita, Milot, Konstantin Schütze, Yoshitaka Moriwaki, Lim Heo, Sergey Ovchinnikov, and Martin Steinegger. 2022. “ColabFold: Making Protein Folding Accessible to All.” Nature Methods 19 (6): 679–82. https://doi.org/10.1038/s41592-022-01488-1.
-
