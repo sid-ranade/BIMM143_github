@@ -1,7 +1,7 @@
 ---
 title: "Class 5: Data viz with ggplot2"
 author: "Siddharth Ranade (PID: A18594442)"
-format: pdf
+format: gfm
 toc: true
 ---
 
