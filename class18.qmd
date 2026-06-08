@@ -1,7 +1,7 @@
 ---
 title: "class18"
 author: "Siddharth (A18594442)"
-format: pdf
+format: html
 ---
 
 # 1. Investigating pertussis cases by year

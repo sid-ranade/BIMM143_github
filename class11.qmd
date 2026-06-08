@@ -6,18 +6,17 @@ format: pdf
 
 # Custom analysis of resulting models
 
-#set pathing and read in a pdb file
-
 ```{r}
-#reading in my protien structure from Alpha fold.  
+library(jsonlite)
+#reading in my protein structure from Alpha fold.  
+#set pathing and read in a pdb file
 library(bio3d)
 pdb <- read.pdb("FindageneprojectCMSS1homolog_23c00/FindageneprojectCMSS1homolog_23c00_unrelaxed_rank_001_alphafold2_ptm_model_1_seed_000.pdb")
 pdb
 ```
 
-#Make a vector of input PDB file names that we can read into R
-
 ```{r}
+#Making a vector of input PDB file names that we can read into R
 # Change this for YOUR results dir name
 results_dir <- "FindageneprojectCMSS1homolog_23c00/"
 pdb_files <- list.files("FindageneprojectCMSS1homolog_23c00/", pattern= ".pdb", full.names = TRUE)
@@ -101,15 +100,8 @@ pdb_files <- list.files(path=results_dir,
 basename(pdb_files)
 ```
 
-```{r}
-pae1 <- read_json(pae_files[1],simplifyVector = TRUE)
-pae5 <- read_json(pae_files[5],simplifyVector = TRUE)
-
-attributes(pae1)
-```
 
 ```{r}
-library(bio3d)
 
 # Read all data from Models 
 #  and superpose/fit coords
@@ -158,12 +150,120 @@ xyz <- pdbfit(pdbs, core.inds, outpath="corefit_structures")
 
 ![](images/clipboard-1513278390.png)
 
-Figure 1. Core superposed 5 structures colored by B-factor.
+Figure 1. 5 structures that are core superimposed, and colored by B-factor.
 
 ```{r}
+# examining the RMSF between positions of the structure. 
+rf <- rmsf(xyz)
+
+plotb3(rf, sse=pdb)
+abline(v=100, col="gray", ylab="RMSF")
+```
+
+The first chain is vary variable while the second is more consistent across other models.
+
+# Predicted Alignment Error for domains
+
+```{r}
+library(jsonlite)
+
+# Listing of all PAE JSON files
+pae_files <- list.files(path=results_dir,
+                        pattern=".*model.*\\.json",
+                        full.names = TRUE)
+```
+
+```{r}
+#readig example json files, changed to 2 and 4 from the example which had 1 and 5. 
+pae2 <- read_json(pae_files[2],simplifyVector = TRUE)
+pae4 <- read_json(pae_files[4],simplifyVector = TRUE)
+
+attributes(pae2)
+```
+
+```{r}
+#looking at the pae values to see which model is best. 
+# Per-residue pLDDT scores 
+#  same as B-factor of PDB..
+head(pae2$plddt) 
+pae2$max_pae
+pae4$max_pae
+```
+
+models 2 and 4 have very similar scores.
+
+```{r}
+# making an N by N plot 
+plot.dmat(pae2$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)")
+```
+
+```{r}
+#plot for pae4
+plot.dmat(pae4$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+
+```{r}
+# new plot but with fixed z range
+plot.dmat(pae2$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+plot.dmat(pae4$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+
+#Residue conservation from alignment file
+
+```{r}
+aln_file <- list.files(path=results_dir,
+                       pattern=".a3m$",
+                        full.names = TRUE)
+aln_file
+aln <- read.fasta(aln_file[1], to.upper = TRUE)
+```
+
+Number of sequences in the alignment:
+
+```{r}
+dim(aln$ali)
+```
+
+```{r}
+#scoring residue conservation
+sim <- conserv(aln)
+plotb3(sim[1:99], sse=trim.pdb(pdb, chain="A"),
+       ylab="Conservation Score")
 
 ```
 
+```{r}
+# making a consensus sequence
+con <- consensus(aln, cutoff = 0.9)
+con$seq
+```
+
+Seems to not have any stand out consesnsus residues
+
+```{r}
+#mapping the conservation score to the occupancy column of a pdb structure 
+m1.pdb <- read.pdb(pdb_files[1])
+occ <- vec2resno(sim[1:278], m1.pdb$atom$resno)
+write.pdb(m1.pdb, o=occ, file="m1_conserv.pdb")
+```
+
+![](images/clipboard-2357504530.png)
+
+Figure 2. structure of CMSS1 viewed in Mol\* colored by Occupancy.
 
 #Citations Baek, Minkyung, Frank DiMaio, Ivan Anishchenko, Justas Dauparas, Sergey Ovchinnikov, Gyu Rie Lee, Jue Wang, et al. 2021. “Accurate Prediction of Protein Structures and Interactions Using a Three-Track Neural Network.” Science 373 (6557): 871–76. https://doi.org/10.1126/science.abj8754.
 
