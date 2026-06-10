@@ -11,7 +11,8 @@ Siddharth Ranade (PID: A18594442)
 5. Lab #7
 6. Lab #8
 7. Lab #9
-8. Lab #10
+8. Lab #10 
+[Structural Bioinformatics (pt1)] (https://htmlpreview.github.io/?[https://raw.githubusercontent.com/sid-ranade/BIMM143_github/refs/heads/main/class10.html])
 9. Lab #11
 10. Lab #12
 11. Lab #13
@@ -23,3 +24,5 @@ Siddharth Ranade (PID: A18594442)
 
 15. Lab #19
 16. Lab #20
+
+ https://htmlpreview.github.io/?[raw-file-url]
