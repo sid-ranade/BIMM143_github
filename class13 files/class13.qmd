@@ -8,9 +8,6 @@ format: html
 ```{r}
 #install.packages("BiocManager")
 #BiocManager::install()
-```
-
-```{r}
 # For this class we will need DESeq2:
 #BiocManager::install("DESeq2")
 ```
@@ -19,7 +16,6 @@ format: html
 library(BiocManager)
 library(DESeq2)
 ```
-
 
 
 #Import countData and colData
@@ -142,10 +138,6 @@ We have about 367 genes that are downregulated at the less than -2 fold change l
 
 We have not determined if the results we see are statistically significant or not, we are only looking at the magnitude of "difference" in expression but not the statistical significance. 
 
-
-
-
-
 # 5 Setting up for DEseq2
 
 
@@ -162,7 +154,7 @@ dds <- DESeqDataSetFromMatrix(countData=counts,
 dds
 ```
 
-# 6 
+# 6 Principal component analysis.
 
 ```{r}
 vsd <- vst(dds, blind = FALSE)
@@ -187,22 +179,158 @@ ggplot(pcaData) +
 
 # 7. DE Seq Analysis. 
 
+```{r}
+dds <- DESeq(dds)
+res <- results(dds)
+View(as_data_frame(res))
+```
+```{r}
+#getting a summary of the results
+summary(res)
+res05 <- results(dds, alpha=0.05)
+summary(res05)
+```
+
+#Adding annotation data
+```{r}
+#BiocManager::install("AnnotationDbi")
+#BiocManager::install("org.Hs.eg.db")
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+```{r}
+columns(org.Hs.eg.db)
+res$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                     multiVals="first")
+head(res)
+```
+##Q11. Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res$genename.
+
+```{r}
+res$entrez <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     column="ENTREZID",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+
+res$uniprot <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     column="UNIPROT",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+
+res$genename <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     column="GENENAME",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+
+head(res)
+# arrange and view based on p value 
+ord <- order( res$padj )
+#View(res[ord,])
+head(res[ord,])
+```
+
+```{r}
+# make a csv of the results
+write.csv(res[ord,], "deseq_results.csv")
+```
+
+#9. Data Visualization
+```{r}
+#volcano plot
+plot( res$log2FoldChange,  -log(res$padj), 
+      xlab="Log2(FoldChange)",
+      ylab="-Log(P-value)")
+```
+```{r}
+# adding colors and significance lines
+# Setup our custom point color vector 
+mycols <- rep("gray", nrow(res))
+mycols[ abs(res$log2FoldChange) > 2 ]  <- "red" 
+
+inds <- (res$padj < 0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+# Volcano plot with custom colors 
+plot( res$log2FoldChange,  -log(res$padj), 
+ col=mycols, ylab="-Log(P-value)", xlab="Log2(FoldChange)" )
+
+# Cut-off lines
+abline(v=c(-2,2), col="gray", lty=2)
+abline(h=-log(0.1), col="gray", lty=2)
+```
+
+```{r}
+#BiocManager::install("EnhancedVolcano") 
+
+library(EnhancedVolcano)
+x <- as.data.frame(res)
+
+EnhancedVolcano(x,
+    lab = x$symbol,
+    x = 'log2FoldChange',
+    y = 'pvalue')
+
+```
+#10. Pathway analysis
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+
+# Examine the first 2 pathways in this kegg set for humans
+head(kegg.sets.hs, 2)
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+attributes(keggres)
+```
 
 
 
+```{r}
+#download pathway figure
+pathview(gene.data=foldchanges, pathway.id="hsa05310")
+
+```
 
 
 
+#Q12. Can you do the same procedure as above to plot the pathview figures for the top 2 down-reguled pathways?
 
 
+```{r}
+# View top down-regulated pathways
+head(keggres$less)
 
+# Get the top 2 pathway IDs
+down.ids <- rownames(keggres$less)[1:2]
 
+down.ids
+pathview(
+  gene.data = foldchanges,
+  pathway.id = down.ids[1],
+  species = "hsa"
+)
 
-
-
-
-
-
+#download the images
+pathview(
+  gene.data = foldchanges,
+  pathway.id = down.ids[2],
+  species = "hsa"
+)
+keggres$less[1:2, ]
+```
 
 
 
