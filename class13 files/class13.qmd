@@ -1,10 +1,11 @@
 ---
 title: "class13"
 author: "Siddharth Ranade (PID: A18594442)"
-format: html
+format: pdf
 ---
 
 #Bioconductor setup
+
 ```{r}
 #install.packages("BiocManager")
 #BiocManager::install()
@@ -17,7 +18,6 @@ library(BiocManager)
 library(DESeq2)
 ```
 
-
 #Import countData and colData
 
 ```{r}
@@ -29,18 +29,16 @@ dim(metadata)
 dim(counts)
 #View(metadata) throws error when rendering
 ```
-##Q1. How many genes are in this dataset? 
 
-There are 38,694 genes in this data set. 
+##Q1. How many genes are in this dataset?
 
-##Q2. How many ‘control’ cell lines do we have? 
+There are 38,694 genes in this data set.
 
+##Q2. How many ‘control’ cell lines do we have?
 
-There are 4 'control' cell lines in the data set. 
+There are 4 'control' cell lines in the data set.
 
 #4. Toy differential gene expression
-
-
 
 ```{r}
 control <- metadata[metadata[,"dex"]=="control",]
@@ -49,14 +47,11 @@ control.mean <- rowSums( control.counts )/4
 head(control.mean)
 ```
 
-##Q3. How would you make the above code in either approach more robust? Is there a function that could help here? 
+##Q3. How would you make the above code in either approach more robust? Is there a function that could help here?
 
 Making a function that takes in the arguments metadata, counts, and what
 
 ##Q4. Follow the same procedure for the treated samples (i.e. calculate the mean per gene across drug treated samples and assign to a labeled vector called treated.mean)
-
-
-
 
 ```{r}
 treated <- metadata[metadata$dex == "treated", ]
@@ -80,12 +75,11 @@ plot(meancounts$control.mean,
 
 ```
 
-##Q5 (b).You could also use the ggplot2 package to make this figure producing the plot below. What geom_?() function would you use for this plot? 
+##Q5 (b).You could also use the ggplot2 package to make this figure producing the plot below. What geom\_?() function would you use for this plot?
 
-I would use geom_point() to make a scatter plot. 
+I would use geom_point() to make a scatter plot.
 
-
-##Q6. Try plotting both axes on a log scale. What is the argument to plot() that allows you to do this? 
+##Q6. Try plotting both axes on a log scale. What is the argument to plot() that allows you to do this?
 
 The argument that lets me plot all axes on a log scale is log = "xy".
 
@@ -98,7 +92,6 @@ plot(meancounts$control.mean,
 ```
 
 ##Q7. What is the purpose of the arr.ind argument in the which() function call above? Why would we then take the first column of the output and need to call the unique() function?
-
 
 ```{r}
 meancounts$log2fc <- log2(meancounts$treated.mean /meancounts$control.mean)
@@ -122,29 +115,25 @@ sum(down.ind)
 
 ```
 
+##Q8. Using the up.ind vector above can you determine how many up regulated genes we have at the greater than 2 fc level?
 
- 
+We have about 250 genes that are upregulated at the greater than 2 fold change level.
 
-##Q8. Using the up.ind vector above can you determine how many up regulated genes we have at the greater than 2 fc level? 
+##Q9. Using the down.ind vector above can you determine how many down regulated genes we have at the greater than 2 fc level?
 
-We have about 250 genes that are upregulated at the greater than 2 fold change level. 
-
-
-##Q9. Using the down.ind vector above can you determine how many down regulated genes we have at the greater than 2 fc level? 
-
-We have about 367 genes that are downregulated at the less than -2 fold change level. 
+We have about 367 genes that are downregulated at the less than -2 fold change level.
 
 ##Q10. Do you trust these results? Why or why not?
 
-We have not determined if the results we see are statistically significant or not, we are only looking at the magnitude of "difference" in expression but not the statistical significance. 
+We have not determined if the results we see are statistically significant or not, we are only looking at the magnitude of "difference" in expression but not the statistical significance.
 
 # 5 Setting up for DEseq2
-
 
 ```{r}
 library(DESeq2)
 citation("DESeq2")
 ```
+
 ```{r}
 # import data as a DEseqDataSet from a matrix of counts and metadata. 
 
@@ -177,13 +166,14 @@ ggplot(pcaData) +
   theme_bw()
 ```
 
-# 7. DE Seq Analysis. 
+# 7. DE Seq Analysis.
 
 ```{r}
 dds <- DESeq(dds)
 res <- results(dds)
-View(as_data_frame(res))
+#View(as_data_frame(res)) throws error when rendering
 ```
+
 ```{r}
 #getting a summary of the results
 summary(res)
@@ -192,12 +182,14 @@ summary(res05)
 ```
 
 #Adding annotation data
+
 ```{r}
 #BiocManager::install("AnnotationDbi")
 #BiocManager::install("org.Hs.eg.db")
 library("AnnotationDbi")
 library("org.Hs.eg.db")
 ```
+
 ```{r}
 columns(org.Hs.eg.db)
 res$symbol <- mapIds(org.Hs.eg.db,
@@ -207,7 +199,8 @@ res$symbol <- mapIds(org.Hs.eg.db,
                      multiVals="first")
 head(res)
 ```
-##Q11. Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res$genename.
+
+##Q11. Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res\$genename.
 
 ```{r}
 res$entrez <- mapIds(org.Hs.eg.db,
@@ -241,12 +234,14 @@ write.csv(res[ord,], "deseq_results.csv")
 ```
 
 #9. Data Visualization
+
 ```{r}
 #volcano plot
 plot( res$log2FoldChange,  -log(res$padj), 
       xlab="Log2(FoldChange)",
       ylab="-Log(P-value)")
 ```
+
 ```{r}
 # adding colors and significance lines
 # Setup our custom point color vector 
@@ -277,6 +272,7 @@ EnhancedVolcano(x,
     y = 'pvalue')
 
 ```
+
 #10. Pathway analysis
 
 ```{r}
@@ -296,18 +292,13 @@ keggres = gage(foldchanges, gsets=kegg.sets.hs)
 attributes(keggres)
 ```
 
-
-
 ```{r}
 #download pathway figure
 pathview(gene.data=foldchanges, pathway.id="hsa05310")
 
 ```
 
-
-
 #Q12. Can you do the same procedure as above to plot the pathview figures for the top 2 down-reguled pathways?
-
 
 ```{r}
 # View top down-regulated pathways
@@ -332,16 +323,6 @@ pathview(
 keggres$less[1:2, ]
 ```
 
+![](images/clipboard-2476607006.png)
 
-
-
-
-
-
-
-
-
-
-
-
-
+![](images/clipboard-4052589310.png)
