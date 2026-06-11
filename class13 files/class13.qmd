@@ -27,7 +27,7 @@ metadata <-  read.csv("airway_metadata.csv")
 head(metadata)
 dim(metadata)
 dim(counts)
-View(metadata)
+#View(metadata) throws error when rendering
 ```
 ##Q1. How many genes are in this dataset? 
 
